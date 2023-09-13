@@ -1,0 +1,15 @@
+{
+    "env": {
+        "browser": true,
+        "jest": true,
+        "es2021": true
+    },
+    "overrides": [
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "rules": {
+    }
+}
