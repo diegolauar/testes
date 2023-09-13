@@ -24,7 +24,7 @@ test('Deve inserir um usuario', () => {
 })
 
 test('Deve armazenar senha criptografada', async () => {
-    const res = await app.post(';users')
+    const res = await request(app).post('/users')
         .send({ name: 'Walter Wither', mail: `${Date.now()}@mail.com`, passwd: '123456' })
     expect(res.status).toBe(201)
 
