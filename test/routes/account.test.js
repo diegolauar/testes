@@ -29,7 +29,7 @@ test('Não deve inserir uma conta sem nome', () => {
         })
 })
 
-test('Deve listar todas as contass', () => {
+test('Deve listar todas as contas', () => {
     return app.db('accounts')
         .insert({ name: 'Acc list', user_id: user.id })
         .then(() => request(app).get(MAIN_ROUTE))

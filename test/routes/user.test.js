@@ -5,7 +5,7 @@ const app = require('../../src/app');
 const mail = `${Date.now()}@mail.com`
 
 
-test('deve listar todos usuarios', () => {
+test('Deve listar todos usuarios', () => {
     return request(app).get('/users')
         .then((res) => {
             expect(res.status).toBe(200);
