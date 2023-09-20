@@ -35,15 +35,16 @@ test('Não deve inserir uma conta sem nome', () => {
 })
 
 test('Nao deve inserir uma conta de nome duplciado, para o mesmo usuario', () => {
-    return app.db('accounts').insert({name: 'Acc Duplicada', user_id: user.id})
-    .then(() => request(app).post(MAIN_ROUTE)
-    .set('authorization', `bearer ${user.token}`)
-    .send({name: 'Acc Duplicada'}))
-    .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe('Ja existe uma conta com esse nome');
-    })
+    return app.db('accounts').insert({ name: 'Acc Duplicada', user_id: user.id })
+        .then(() => request(app).post(MAIN_ROUTE)
+            .set('authorization', `bearer ${user.token}`)
+            .send({ name: 'Acc Duplicada' }))
+        .then((res) => {
+            expect(res.status).toBe(400);
+            expect(res.body.error).toBe('Ja existe uma conta com esse nome');
+        })
 })
+
 
 // test('Deve listar todas as contas', () => {
 //     return app.db('accounts')
@@ -81,7 +82,16 @@ test('Deve retorna uma conta por ID', () => {
         })
 })
 
-test.skip('Não deve retornar uma conta de outro usuario', () => { })
+test('Não deve retornar uma conta de outro usuario', () => {
+    return app.db('accounts')
+        .insert({ name: 'Acc User 2', user_id: user2.id }, ['id'])
+        .then(acc => request(app).get(`${MAIN_ROUTE}/${acc[0].id}`)
+            .set('authorization', `bearer ${user.token}`))
+        .then((res) => {
+            expect(res.status).toBe(403)
+            expect(res.body.error).toBe('Esse recurso não pertence ao usuario')
+        })
+})
 
 test('Deve alterar uma conta', () => {
     return app.db('accounts')
