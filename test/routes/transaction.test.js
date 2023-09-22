@@ -25,6 +25,8 @@ beforeAll(async () => {
     ], '*');
     [accUser, accUser2] = accs
 })
+
+
 test('Deve listar apenas as transações do usuario', () => {
     return app.db('transactions').insert([
         { description: 'T1', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id },
@@ -41,82 +43,101 @@ test('Deve listar apenas as transações do usuario', () => {
 
 test('Deve inserir uma transição com sucesso', () => {
     return request(app).post(MAIN_ROTE)
-    .set('authorization', `bearer ${user.token}`)
-    .send({description: 'New T', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id})
-    .then((res) => {
-        expect(res.status).toBe(201)
-        expect(res.body.acc_id).toBe(accUser.id)
-        expect(res.body.ammount).toBe('100.00')
-    })
+        .set('authorization', `bearer ${user.token}`)
+        .send({ description: 'New T', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id })
+        .then((res) => {
+            expect(res.status).toBe(201)
+            expect(res.body.acc_id).toBe(accUser.id)
+            expect(res.body.ammount).toBe('100.00')
+        })
 });
 
 test('Transações de entrada devem ser positivas', () => {
     return request(app).post(MAIN_ROTE)
-    .set('authorization', `bearer ${user.token}`)
-    .send({description: 'New T', date: new Date(), ammount: -100, type: 'I', acc_id: accUser.id})
-    .then((res) => {
-        expect(res.status).toBe(201)
-        expect(res.body.acc_id).toBe(accUser.id)
-        expect(res.body.ammount).toBe('100.00')
-    })
+        .set('authorization', `bearer ${user.token}`)
+        .send({ description: 'New T', date: new Date(), ammount: -100, type: 'I', acc_id: accUser.id })
+        .then((res) => {
+            expect(res.status).toBe(201)
+            expect(res.body.acc_id).toBe(accUser.id)
+            expect(res.body.ammount).toBe('100.00')
+        })
 });
 
-test('Transações de saida devem ser positivas', () => {
+test('Transações de saida devem ser negativas', () => {
     return request(app).post(MAIN_ROTE)
-    .set('authorization', `bearer ${user.token}`)
-    .send({description: 'New T', date: new Date(), ammount: 100, type: 'O', acc_id: accUser.id})
-    .then((res) => {
-        expect(res.status).toBe(201)
-        expect(res.body.acc_id).toBe(accUser.id)
-        expect(res.body.ammount).toBe('-100.00')
-    })
+        .set('authorization', `bearer ${user.token}`)
+        .send({ description: 'New T', date: new Date(), ammount: 100, type: 'O', acc_id: accUser.id })
+        .then((res) => {
+            expect(res.status).toBe(201)
+            expect(res.body.acc_id).toBe(accUser.id)
+            expect(res.body.ammount).toBe('-100.00')
+        })
 });
+
+describe('Ao tentar inserir uma transação inválida', () => {
+    const testTemplate = (newData, errorMessage) => {
+        return request(app).post(MAIN_ROTE)
+            .set('authorization', `bearer ${user.token}`)
+            .send({ description: 'New T', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id, ...newData })
+            .then((res) => {
+                expect(res.status).toBe(400)
+                expect(res.body.error).toBe(errorMessage)
+            })
+    };
+    test('Não deve inserir sem descrição', () => testTemplate({ description: null }, 'Descrição é um atributo obrigatório'));
+    test('Não deve inserir sem valor', () => testTemplate({ ammount: null }, 'Valor é um atributo obrigatório'));
+    test('Não deve inserir sem data', () => testTemplate({ date: null }, 'Data é um atributo obrigatório'));
+    test('Não deve inserir sem conta', () => testTemplate({ acc_id: null }, 'Conta é um atributo obrigatório'));
+    test('Não deve inserir sem tipo', () => testTemplate({ type: null }, 'Tipo é um atributo obrigatório'));
+    test('Não deve inserir com tipo', () => testTemplate({ type: 'A' }, 'Tipo invalido'));
+
+})
 
 test('Deve retornar uma transição por id', () => {
     return app.db('transactions').insert(
-       {description: 'T ID', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id},['id']
+        { description: 'T ID', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id }, ['id']
     ).then(trans => request(app).get(`${MAIN_ROTE}/${trans[0].id}`)
-    .set('authorization', `bearer ${user.token}`)
-    .then((res) => {
-        expect(res.status).toBe(200)
-        expect(res.body.id).toBe(trans[0].id)
-        expect(res.body.description).toBe('T ID')
-    }))
-   
+        .set('authorization', `bearer ${user.token}`)
+        .then((res) => {
+            expect(res.status).toBe(200)
+            expect(res.body.id).toBe(trans[0].id)
+            expect(res.body.description).toBe('T ID')
+        }))
+
 });
 
 test('Deve alterar uma transição', () => {
     return app.db('transactions').insert(
-       {description: 'T Update', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id},['id']
+        { description: 'T Update', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id }, ['id']
     ).then(trans => request(app).put(`${MAIN_ROTE}/${trans[0].id}`)
-    .set('authorization', `bearer ${user.token}`)
-    .send({description: 'Updated'})
-    .then((res) => {
-        expect(res.status).toBe(200)
-        expect(res.body.description).toBe('Updated')
-    }))
-   
+        .set('authorization', `bearer ${user.token}`)
+        .send({ description: 'Updated' })
+        .then((res) => {
+            expect(res.status).toBe(200)
+            expect(res.body.description).toBe('Updated')
+        }))
+
 });
 
 test('Deve remover uma transição', () => {
     return app.db('transactions').insert(
-       {description: 'T Delete', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id},['id']
+        { description: 'T Delete', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id }, ['id']
     ).then(trans => request(app).delete(`${MAIN_ROTE}/${trans[0].id}`)
-    .set('authorization', `bearer ${user.token}`)
-    .then((res) => {
-        expect(res.status).toBe(204)
-    }))
-   
+        .set('authorization', `bearer ${user.token}`)
+        .then((res) => {
+            expect(res.status).toBe(204)
+        }))
+
 });
 
 test('Não deve remover uma transição de outro usuario', () => {
     return app.db('transactions').insert(
-       {description: 'T Delete', date: new Date(), ammount: 100, type: 'I', acc_id: accUser2.id},['id']
+        { description: 'T Delete', date: new Date(), ammount: 100, type: 'I', acc_id: accUser2.id }, ['id']
     ).then(trans => request(app).delete(`${MAIN_ROTE}/${trans[0].id}`)
-    .set('authorization', `bearer ${user.token}`)
-    .then((res) => {
-        expect(res.status).toBe(403)
-        expect(res.body.error).toBe('Esse recurso não pertence ao usuario')
-    }))
-   
+        .set('authorization', `bearer ${user.token}`)
+        .then((res) => {
+            expect(res.status).toBe(403)
+            expect(res.body.error).toBe('Esse recurso não pertence ao usuario')
+        }))
+
 });
