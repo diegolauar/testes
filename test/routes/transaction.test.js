@@ -61,3 +61,16 @@ test('Deve retornar uma transição por id', () => {
     }))
    
 });
+
+test('Deve alterar uma transição por id', () => {
+    return app.db('transactions').insert(
+       {description: 'T Update', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id},['id']
+    ).then(trans => request(app).put(`${MAIN_ROTE}/${trans[0].id}`)
+    .set('authorization', `bearer ${user.token}`)
+    .send({description: 'Updated'})
+    .then((res) => {
+        expect(res.status).toBe(200)
+        expect(res.body.description).toBe('Updated')
+    }))
+   
+});
