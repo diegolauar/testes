@@ -38,3 +38,13 @@ test('Deve listar apenas as transações do usuario', () => {
         }))
 
 })
+
+test('Deve inserir uma transição com sucesso', () => {
+    return request(app).post(MAIN_ROTE)
+    .set('authorization', `bearer ${user.token}`)
+    .send({description: 'New T', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id})
+    .then((res) => {
+        expect(res.status).toBe(201)
+        expect(res.body.acc_id).toBe(accUser.id)
+    })
+});
