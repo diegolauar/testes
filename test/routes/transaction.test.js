@@ -127,7 +127,6 @@ test('Deve remover uma transição', () => {
         .then((res) => {
             expect(res.status).toBe(204)
         }))
-
 });
 
 test('Não deve remover uma transição de outro usuario', () => {
@@ -140,4 +139,15 @@ test('Não deve remover uma transição de outro usuario', () => {
             expect(res.body.error).toBe('Esse recurso não pertence ao usuario')
         }))
 
+});
+
+test('Não deve remover conta com transação', () => {
+    return app.db('transactions').insert(
+        { description: 'T Delete', date: new Date(), ammount: 100, type: 'I', acc_id: accUser.id }, ['id']
+    ).then(() => request(app).delete(`/v1/accounts/${accUser.id}`)
+        .set('authorization', `bearer ${user.token}`)
+        .then((res) => {
+            expect(res.status).toBe(400)
+            expect(res.body.error).toBe('Essa conta possui transações associadas')
+        }))
 });
