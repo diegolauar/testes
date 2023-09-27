@@ -1,7 +1,7 @@
 
 exports.up = (knex) => {
     return Promise.all([
-        knex.schema.createTable('transfers', (t) => {
+         knex.schema.createTable('transfers', (t) => {
             t.increments('id').primary();
             t.string('description').notNull();
             t.date('date').notNull();
@@ -19,7 +19,7 @@ exports.up = (knex) => {
                 .inTable('users')
                 .notNull();
         }),
-        knex.schema.table('transactions', (t) => {
+         knex.schema.table('transactions', (t) => {
             t.integer('transfer_id')
                 .references('id')
                 .inTable('transfers')
@@ -33,6 +33,6 @@ exports.down = (knex) => {
         knex.schema.table('transactions', (t) => {
             t.dropColumn('transfer_id')
         }),
-        kenx.schema.dropTable('transfers')
-     ])
+        knex.schema.dropTable('transfers')
+    ])
 };
