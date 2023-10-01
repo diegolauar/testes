@@ -16,17 +16,17 @@ module.exports = (app) => {
 
     const save = async (transfer) => {
 
-        if(!transfer.description) throw new ValidationError('Descrição é um atributo obrigatório')
-        if(!transfer.ammount) throw new ValidationError('Valor é um atributo obrigatório')
-        if(!transfer.date) throw new ValidationError('Data é um atributo obrigatório')
-        if(!transfer.acc_ori_id) throw new ValidationError('Conta de origem é um atributo obrigatório')
-        if(!transfer.acc_dest_id) throw new ValidationError('Conta de destino é um atributo obrigatório')
-        if(transfer.acc_ori_id === transfer.acc_dest_id) throw new ValidationError('Não é possivel transferir de uma conta para a mesma')
+        if (!transfer.description) throw new ValidationError('Descrição é um atributo obrigatório')
+        if (!transfer.ammount) throw new ValidationError('Valor é um atributo obrigatório')
+        if (!transfer.date) throw new ValidationError('Data é um atributo obrigatório')
+        if (!transfer.acc_ori_id) throw new ValidationError('Conta de origem é um atributo obrigatório')
+        if (!transfer.acc_dest_id) throw new ValidationError('Conta de destino é um atributo obrigatório')
+        if (transfer.acc_ori_id === transfer.acc_dest_id) throw new ValidationError('Não é possivel transferir de uma conta para a mesma')
 
         const accounts = await app.db('accounts').whereIn('id', [transfer.acc_dest_id, transfer.acc_ori_id])
         accounts.forEach(acc => {
-            if(acc.user_id != parseInt(transfer.user_id, 10)) throw new ValidationError(`Conta de numero ${acc.id} não pertence ao usuario`) 
-        });  
+            if (acc.user_id != parseInt(transfer.user_id, 10)) throw new ValidationError(`Conta de numero ${acc.id} não pertence ao usuario`)
+        });
 
         const result = await app.db('transfers').insert(transfer, '*')
         const transferId = result[0].id
@@ -38,8 +38,25 @@ module.exports = (app) => {
 
         await app.db('transactions').insert(transactions)
         return result
+
     }
 
-    return { find, save, findOne }
+    const update = async (id, transfer) => {
+
+        const result = await app.db('transfers')
+            .where({id})
+            .update(transfer, '*')
+
+        const transactions = [
+            { description: `Transfer to acc ${transfer.acc_dest_id}`, date: transfer.date, ammount: transfer.ammount * -1, type: 'O', acc_id: transfer.acc_ori_id, transfer_id: id },
+            { description: `Transfer from acc ${transfer.acc_ori_id}`, date: transfer.date, ammount: transfer.ammount, type: 'I', acc_id: transfer.acc_dest_id, transfer_id: id }
+        ]
+
+        await app.db('transactions').where({ transfer_id: id }).del()
+        await app.db('transactions').insert(transactions)
+        return result
+    }
+
+    return { find, save, findOne, update }
 }
 
