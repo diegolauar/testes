@@ -4,12 +4,12 @@ const RecursoIndevidoErro = require('../erros/RecursoIndevidoErro')
 module.exports = (app) => {
     const router = express.Router()
 
-    router.param('id', (req,res,next) => {
+    router.param('id', (req, res, next) => {
         app.services.transfer.findOne({ id: req.params.id })
-        .then((result) => {
-            if(result.user_id != req.user.id) throw new RecursoIndevidoErro()
-            next()
-        }).catch(err => next(err))
+            .then((result) => {
+                if (result.user_id != req.user.id) throw new RecursoIndevidoErro()
+                next()
+            }).catch(err => next(err))
     })
 
     const validate = (req, res, next) => {

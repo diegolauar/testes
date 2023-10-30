@@ -2,7 +2,7 @@ const request = require('supertest')
 const app = require('../../src/app');
 const transfer = require('../../src/services/transfer');
 
-const MAIN_ROTE = '/v1/transfers';
+const MAIN_ROUTE = '/v1/transfers';
 const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAwMDAsIm5hbWUiOiJVc2VyICMxIiwibWFpbCI6InVzZXIxQG1haWwuY29tIn0.QMgvo_lPe0Rdxpx7cay_hIkDAbjCK_--VD2fP0NTTqk'
 
 
@@ -11,7 +11,7 @@ beforeAll(async () => {
 })
 
 test('Deve listar apenas as transferencias do usuario', () => {
-    return request(app).get(MAIN_ROTE)
+    return request(app).get(MAIN_ROUTE)
         .set('authorization', `bearer ${TOKEN}`)
         .then((res) => {
             expect(res.status).toBe(200)
@@ -21,7 +21,7 @@ test('Deve listar apenas as transferencias do usuario', () => {
 })
 
 test('Deve inserir uma transferencia com sucesso', () => {
-    return request(app).post(MAIN_ROTE)
+    return request(app).post(MAIN_ROUTE)
         .set('authorization', `bearer ${TOKEN}`)
         .send({ description: 'Regular Transfer', user_id: 10000, acc_ori_id: 10000, acc_dest_id: 10001, ammount: 100, date: new Date() })
         .then(async (res) => {
@@ -45,7 +45,7 @@ describe('Ao salvar uma transferencia valida:', () => {
     let outcome;
 
     test('Deve retornar o status 201 e os dados da transferencia', () => {
-        return request(app).post(MAIN_ROTE)
+        return request(app).post(MAIN_ROUTE)
             .set('authorization', `bearer ${TOKEN}`)
             .send({ description: 'Regular Transfer', user_id: 10000, acc_ori_id: 10000, acc_dest_id: 10001, ammount: 100, date: new Date() })
             .then(async (res) => {
@@ -88,7 +88,7 @@ describe('Ao tentar salvar uma transferencia invalida...', () => {
 
     const validTransfer = { description: 'Regular Transfer', user_id: 10000, acc_ori_id: 10000, acc_dest_id: 10001, ammount: 100, date: new Date() }
     const template = (newData, errorMessage) => {
-        return request(app).post(MAIN_ROTE)
+        return request(app).post(MAIN_ROUTE)
             .set('authorization', `bearer ${TOKEN}`)
             .send({ ...validTransfer, ...newData })
             .then(async (res) => {
@@ -107,7 +107,7 @@ describe('Ao tentar salvar uma transferencia invalida...', () => {
 })
 
 test('Deve uma transferencia por id', () => {
-    return request(app).get(`${MAIN_ROTE}/10000`)
+    return request(app).get(`${MAIN_ROUTE}/10000`)
         .set('authorization', `bearer ${TOKEN}`)
         .then((res) => {
             expect(res.status).toBe(200)
@@ -121,7 +121,7 @@ describe('Ao alterar uma transferencia valida...', () => {
     let outcome;
 
     test('Deve retornar o status 200 e os dados da transferencia', () => {
-        return request(app).put(`${MAIN_ROTE}/10000`)
+        return request(app).put(`${MAIN_ROUTE}/10000`)
             .set('authorization', `bearer ${TOKEN}`)
             .send({ description: 'Transfer Updated', user_id: 10000, acc_ori_id: 10000, acc_dest_id: 10001, ammount: 500, date: new Date() })
             .then(async (res) => {
@@ -166,7 +166,7 @@ describe('Ao tentar alterar uma transferencia invalida...', () => {
 
     const validTransfer = { description: 'Regular Transfer', user_id: 10000, acc_ori_id: 10000, acc_dest_id: 10001, ammount: 100, date: new Date() }
     const template = (newData, errorMessage) => {
-        return request(app).put(`${MAIN_ROTE}/10000`)
+        return request(app).put(`${MAIN_ROUTE}/10000`)
             .set('authorization', `bearer ${TOKEN}`)
             .send({ ...validTransfer, ...newData })
             .then(async (res) => {
@@ -186,7 +186,7 @@ describe('Ao tentar alterar uma transferencia invalida...', () => {
 
 describe('Ao remover uma transferencia', () => {
     test('Deve retornar status 204', () => {
-        return request(app).delete(`${MAIN_ROTE}/10000`)
+        return request(app).delete(`${MAIN_ROUTE}/10000`)
             .set('authorization', `bearer ${TOKEN}`)
             .then((res) => {
                 expect(res.status).toBe(204)
@@ -209,10 +209,10 @@ describe('Ao remover uma transferencia', () => {
 })
 
 test('Não deve retornar transferência de outro usuario', () => {
-    return request(app).get(`${MAIN_ROTE}/10001`)
-    .set('authorization', `bearer ${TOKEN}`)
-    .then(async (res) => {
-        expect(res.status).toBe(403)
-        expect(res.body.error).toBe('Esse recurso não pertence ao usuario')
-    })
+    return request(app).get(`${MAIN_ROUTE}/10001`)
+        .set('authorization', `bearer ${TOKEN}`)
+        .then(async (res) => {
+            expect(res.status).toBe(403)
+            expect(res.body.error).toBe('Esse recurso não pertence ao usuario')
+        })
 })
