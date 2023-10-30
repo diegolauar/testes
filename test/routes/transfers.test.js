@@ -206,6 +206,13 @@ describe('Ao remover uma transferencia', () => {
                 expect(result).toHaveLength(0)
             })
     })
+})
 
-
+test('Não deve retornar transferência de outro usuario', () => {
+    return request(app).get(`${MAIN_ROTE}/10001`)
+    .set('authorization', `bearer ${TOKEN}`)
+    .then(async (res) => {
+        expect(res.status).toBe(403)
+        expect(res.body.error).toBe('Esse recurso não pertence ao usuario')
+    })
 })
