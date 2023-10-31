@@ -80,7 +80,11 @@ describe('Ao salvar uma transferencia valida:', () => {
     test('Ambas devem referencias a transferencias que as originou', () => {
         expect(income.transfer_id).toBe(transferId)
         expect(outcome.transfer_id).toBe(transferId)
+    })
 
+    test('Ambas devem estar com status de realizadas', () => {
+        expect(income.status).toBe(true)
+        expect(outcome.status).toBe(true)
     })
 })
 

@@ -59,6 +59,7 @@ test('Nao deve inserir uma conta de nome duplciado, para o mesmo usuario', () =>
 
 test('Deve listar apenas as contas dos usuario', async () => {
     await app.db('transactions').del();
+    await app.db('transfers').del();
     await app.db('accounts').del();
     return app.db('accounts').insert([
         { name: 'Acc User 1', user_id: user.id },

@@ -154,7 +154,7 @@ describe('Ao calcular saldo do usuario... ', () => {
                         expect(res.body[0].id).toBe(10100)
                         expect(res.body[0].sum).toBe('-100.00')
                         expect(res.body[1].id).toBe(10101)
-                        expect(res.body[1].sum).toBe('200.00')
+                        expect(res.body[1].sum).toBe('300.00')
                     })
             })
     })

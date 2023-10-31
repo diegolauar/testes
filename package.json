@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "test": "jest",
-    "secure-mode": "jest --watchAll --verbose=false",
+    "secure-mode": "jest --watchAll --verbose=false --runInBand",
     "lint": "eslint src/** test/** --fix"
   },
   "keywords": [],
